@@ -1,0 +1,67 @@
+*
+{
+	margin: 0px;
+	padding: 0px;
+	box-sizing:border-box;
+}
+
+:root
+{
+	--corPreto: #000000;
+}
+
+body
+{
+	font-family: Verdana;
+}
+
+header
+{
+	text-align: center;
+}
+
+header button
+{
+	width: 150px;
+}
+
+section
+{
+	width: 500px;
+	height: 500px;
+	padding: 10px;
+	margin: auto;
+}
+
+footer
+{
+	margin-top: 10px;
+}
+
+div.quadrante
+{
+	margin: auto;
+	padding: 3px;	
+	height: 159px;	
+}
+
+div.quadrante > div
+{
+	display: inline-block;
+	width: 150px;
+	height: 150px;
+	font-weight: bold;
+	font-size: 6em;
+	text-align: center;
+}
+
+#divl1, #divl2
+{
+	border-bottom: 3px solid var(--corPreto);
+}
+
+#divl1c2, #divl2c2, #divl3c2
+{
+	border-left: 3px solid var(--corPreto);
+	border-right: 3px solid var(--corPreto);	
+}
