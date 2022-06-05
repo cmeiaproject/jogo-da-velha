@@ -2,6 +2,7 @@
 <html lang="pt-br">
 	<head>
 		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<title>Jogo da Velha v.1</title>
 		<link rel="stylesheet" href="./css/estilo.css" />
 		<script src="./js/script.js"></script>
@@ -9,9 +10,20 @@
 	<body>
 		<header>
 			<h1>Jogo da Velha</h1>
-			<button id="btnNovoJogo">Novo Jogo</button>
 		</header>	
 		<main>
+			<div class="formulario">
+				<div>
+					<label for="nivelJogo">Nível do Jogo</label>
+					<select id="nivelJogo" name="nivelJogo">
+						<option value="0" selected>Fácil</option>
+						<option value="1">Médio</option>
+						<option value="2">Avançado</option>					
+					</select>
+				</div>	
+				<button id="btnNovoJogo">Novo Jogo</button>				
+				<button id="btnNomeJogador">Nome do Jogador</button>								
+			</div>	
 			<section>
 				<div id="divl1" class="quadrante">
 					<div id="divl1c1"></div>
@@ -31,8 +43,8 @@
 			</section>
 		</main>
 		<footer>
-			<p id="resultadoJogadorHumano"></p>
-			<p id="resultadoJogadorEletronico"></p>			
+			<p id="jogador"></p>
+			<p id="resultadoJogo"></p>			
 		</footer>
 	</body>
 </html>

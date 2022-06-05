@@ -38,6 +38,20 @@ footer
 	margin-top: 10px;
 }
 
+.formulario
+{
+	text-align: center;
+	margin-top: 10px;
+	padding: 5px;
+}
+
+.formulario button
+{
+	margin-top: 5px;
+}
+
+
+
 div.quadrante
 {
 	margin: auto;

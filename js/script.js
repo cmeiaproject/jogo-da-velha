@@ -1,21 +1,37 @@
 let tabuleiro = new Array();
 let divTabela = new Array();
 let btnNovoJogo;
+let btnNomeJogador;
 let item;
+let resultadoJogo;
 let resultadoJogadorHumano;
 let resultadoJogadorEletronico;
-let jogando;
-let nivel =0 ;
+let continuarJogando = false;
+let nivel = 0;
+let comboNivelJogo;
+let jogador;
+let jogadorLabel;
+let tempoJogadorEletronico = 5000;
+let jogadorEletronico = 0;
+let jogadorHumano = 1;
+let nomeJogador = 'Fulano';
 
-function ganhador(e)
+function retornarPrimeiroJogador()
+{
+	return Math.round( Math.random() );
+}
+
+
+function statusJogo(e, iniciarLoop = 0, finalizarLoop = 4)
 {
 	let xTotal, yTotal;
 	let x, y;	
 	let soma;
 	let res;
+	let l, c;
 	
-	let totalLoop = 4;
-	let loop = 0;
+	let totalLoop = finalizarLoop;
+	let loop = iniciarLoop;
 
 	// loop = 0, faz varredura linha/coluna
 	// loop = 1, faz varredura coluna/linha
@@ -31,7 +47,7 @@ function ganhador(e)
 		xTotal = 3;
 		yTotal = 3;
 
-		for(let l = y; l < yTotal; l++)
+		for(l = y; l < yTotal; l++)
 		{
 			if( loop == 2 )
 			{
@@ -49,7 +65,7 @@ function ganhador(e)
 				soma = 0;
 			}	
 			
-			for(let c = x; c < xTotal; c++)
+			for(c = x; c < xTotal; c++)
 			{
 				if( loop == 1 )				
 				{
@@ -82,14 +98,14 @@ function ganhador(e)
 		loop++;
 	}	
 	
-	if(jogando)
+	if(continuarJogando)
 	{	
-		jogando = (soma != 30);
+		continuarJogando = (soma != 30);
 	}	
 	
-	return (soma == 30);
-	
+	return new Array( (soma == 30), soma, loop, l, c );
 }
+
 
 function inicializarTabuleiro()
 {
@@ -114,6 +130,64 @@ function limparDivs()
 	}	
 }
 
+
+function calcularJogadaAdversario(value)
+{
+	console.log('calcularJogadaAdversario');
+	
+	let resultado;
+
+	
+	let p = new Array();
+	let l, c, i;
+	let flag = 'N';
+
+	for (i=0; i<4; i++)
+	{	
+
+		resultado = statusJogo(value, i, ++i);
+		console.log('resultado: ' + resultado);		
+	
+		if( resultado[1] == 20 )
+		{
+			l = resultado[2];
+			c = resultado[3];
+			flag = 'S';
+			switch(resultado[1])
+			{
+				case 0: 
+						c = 2;
+						break;
+						
+				case 1: l = 2;
+						break;
+						
+				case 2: 
+						l = 2;
+						c = 2;
+						break;
+				
+				case 3: 
+						l = 0;
+						c = 0;
+						break;			
+				default:
+						flag = 'N'		
+						break;
+			}
+			
+			if( flag == 'S' )
+			{	
+				p = [l, c];		
+			}	
+			
+			break;
+		}	
+	}	
+	
+	return p;
+}
+
 function marcarRegiao(e)
 {
 	let name = e.id;
@@ -126,79 +200,191 @@ function marcarRegiao(e)
 	tabuleiro[l][c] = valor;
 }
 
+function jogarIntermediario()
+{
+	let i, j;
+	let value = 'N';
 
-function jogadorEletronico()
+	let res = calcularJogadaAdversario('X');
+	console.log(res);	
+	if( res.length > 0 )
+	{
+		return new Array('S', res[0], res[1]);
+	}	
+
+	do
+	{
+		i = Math.round( Math.random() * 2 );
+		j = Math.round( Math.random() * 2 );		
+	}	
+	while( (tabuleiro[i][j] != "") );
+		
+	return new Array('S', i, j);
+
+}
+
+function jogarAvancado()
+{
+	return jogarIniciante();
+}
+
+function jogarIniciante()
+{
+	let i, j;
+	let value = 'N';
+	
+	for(i=0; i<3; i++)
+	{	
+		for(j=0; j<3; j++)
+		{
+			if(tabuleiro[i][j] == "")
+			{	
+				value = "S";
+				break;
+			}
+		}	
+		
+		if(value == "S")
+		{
+			break;
+		}
+	}		
+	
+	return new Array(value, i, j);
+}
+
+
+function realizarJogadaEletronica(nivel, Iniciante, Intermediario, Avancado)
+{
+	let resultado;
+	
+	if(nivel == 2)
+	{
+		resultado = Avancado();
+	}	
+	else if(nivel == 1)
+	{
+		resultado = Intermediario();		
+	}	
+	else
+	{
+		resultado = Iniciante();				
+	}	
+	
+	return resultado;
+}
+
+
+function realizarJogadaJogadorEletronico()
 {
 	let jogadaFeita = "N";
 	let marcarDiv;
 	let name;
 	let i, j;
 	
-	for(i=0; i<3; i++)
+	if(continuarJogando && (jogador == jogadorEletronico))
 	{	
-		for(j=0; j<3; j++)
-		{
-			if(nivel == 0)
-			{	
-				if(tabuleiro[i][j] == "")
-				{	
-					jogadaFeita = "S";
-					break;
-				}	
-			}
-		}	
-		if(jogadaFeita == "S")
-		{
-			break;
+	
+		jogadaFeita = realizarJogadaEletronica(nivel, 
+												jogarIniciante, 
+												jogarIntermediario, 
+												jogarAvancado);
+	
+		if(jogadaFeita[0] == "S")
+		{	
+			i = ++jogadaFeita[1];
+			j = ++jogadaFeita[2];
+			name = "divl" +i.toString()+ "c" +j.toString();
+			marcarDiv = document.getElementById(name);
+			marcarDiv.innerHTML = "0";
+			marcarRegiao(marcarDiv);
+	
+			exibirResultado('0');
+			jogador = jogadorHumano;
 		}
 	}	
 	
-	
-	if(jogadaFeita == "S")
-	{	
-		i++;
-		j++;
-		name = "divl" +i.toString()+ "c" +j.toString();
-		marcarDiv = document.getElementById(name);
-		marcarDiv.innerHTML = "0";
-		marcarRegiao(marcarDiv);
-		
-		let res = ganhador("0") ? "Ganhador" : "Perdeu";
-		
-		resultadoJogadorEletronico.innerHTML = "Computador " + res;				
-	}
+	exibirJogador();	
+
+}
+
+function exibirResultado(value)
+{
+	if( statusJogo(value)[0] )
+	{
+		resultadoJogo.innerHTML = 'Ganhador: ';
+		resultadoJogo.innerHTML += (value == 'X') ? nomeJogador : 'Computador';		
+		continuarJogando = false;
+	}	
 }
 
 function divTabelaClick(e)
 {
-	if(jogando)
+	if(continuarJogando && (jogador == jogadorHumano))
 	{	
-		this.innerHTML = "X";
-		marcarRegiao(this);
+		if (this.innerHTML == "&nbsp;")
+		{	
+			this.innerHTML = "X";
+			marcarRegiao(this);
 
-		let res = ganhador("X") ? "Ganhador" : "Perdeu";
-		resultadoJogadorHumano.innerHTML = "Jogador Humano " + res;		
-		jogadorEletronico();	
-	}			
-
+			exibirResultado('X');
+			jogador = jogadorEletronico;
+		}	
+	}	
+	
+	exibirJogador();
 }
 
-function iniciarJogo()
+function exibirJogador()
 {
+	if(continuarJogando)
+	{	
+		jogadorLabel.innerHTML = 'Jogador a jogar : ';
+		jogadorLabel.innerHTML += (jogador == jogadorEletronico) ? 'Computador' : nomeJogador;		
+	}
+	else	
+	{
+		jogadorLabel.innerHTML = '';		
+	}	
+}
+
+function iniciarPrimeiraJogada()
+{
+	jogador = retornarPrimeiroJogador()
+	exibirJogador( jogador );
+	
+}
+
+function btnNomeJogadorClick()
+{
+	nomeJogador = prompt('Jogador, digite o seu nome', 'Fulano');
+}
+
+
+function iniciarNovoJogoClick()
+{
+	continuarJogando = true;
 	limparDivs();
 	inicializarTabuleiro();
-	jogando = true;
+	iniciarPrimeiraJogada();
+	
+	setInterval(realizarJogadaJogadorEletronico, tempoJogadorEletronico);
 }
 
-function initialize()
+function comboNivelJogoChange(e)
+{
+	nivel = e.target.value;
+	
+	tempoJogadorEletronico = (nivel == 0) ? 5000 : (nivel == 1) ? 2000 : 500;
+}
+
+function atribuirEventos()
 {
 	let i;
 	
-	btnNovoJogo = document.getElementById("btnNovoJogo");
-	resultadoJogadorHumano = document.getElementById("resultadoJogadorHumano");	
-	resultadoJogadorEletronico = document.getElementById("resultadoJogadorEletronico");		
-	lista = document.getElementById("lista");		
-	btnNovoJogo.onclick = iniciarJogo; 	
+	comboNivelJogo.addEventListener('change', comboNivelJogoChange);
+	btnNovoJogo.onclick = iniciarNovoJogoClick; 				
+	btnNomeJogador.onclick = btnNomeJogadorClick; 					
 	
 	for(let y=1; y<4; y++)
 	{	
@@ -209,7 +395,25 @@ function initialize()
 			divTabela[i].onclick = divTabelaClick;
 		}	
 	}	
+	
+}
 
+
+function inicializarVariaveis()
+{
+	btnNovoJogo 	= document.getElementById("btnNovoJogo");
+	resultadoJogo 	= document.getElementById("resultadoJogo");		
+	jogadorLabel	= document.getElementById("jogador");	
+	comboNivelJogo	= document.getElementById("nivelJogo");			
+	btnNomeJogador 	= document.getElementById("btnNomeJogador");	
+	
+	atribuirEventos();
+}
+
+
+function initialize()
+{
+	inicializarVariaveis();
 	inicializarTabuleiro();
 	limparDivs();
 }
