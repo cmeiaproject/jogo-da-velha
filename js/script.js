@@ -15,12 +15,158 @@ let tempoJogadorEletronico = 5000;
 let jogadorEletronico = 0;
 let jogadorHumano = 1;
 let nomeJogador = 'Fulano';
+let temporizador;
+
+function pararTemporizador()
+{
+	clearInterval(temporizador);
+}
 
 function retornarPrimeiroJogador()
 {
 	return Math.round( Math.random() );
 }
 
+function realizarVarreduraVH(e, p = 0, direcao = 'H')
+{
+	let soma = 0;
+	let i, n;
+	let x, y;
+	let res;
+	
+	for(i=0; i<3; i++)
+	{
+		x = (direcao == 'H') ? i : p;
+		y = (direcao == 'H') ? p : i;		
+		
+		if (tabuleiro[y][x] == "") 
+		{
+			n = (direcao == 'H') ? x : y;		
+			console.log('valor de n:' + n);				
+		}	
+		soma += (tabuleiro[y][x] == e) ? 10 : 0;
+	}	
+	
+	if( n != null && n != undefined )
+	{	
+		let c = (direcao == 'H') ? n : p;
+		let l = (direcao == 'H') ? p : n;	
+	
+		res = new Array(soma, l, c);
+	}
+	else
+	{
+		res = [];
+	}	
+	console.log('direção:'+direcao+'. realizarVarreduraVH: ' + res);	
+	
+	return res;
+}	
+
+function realizarVarreduraCruzada(e, direcao = "toDireita")
+{
+	let soma = 0;
+	let i, n;
+	let x, y, c;
+	let res;
+	
+	for(i=0; i<3; i++)
+	{
+		if(direcao == 'toEsquerda')
+		{
+			c = 2 - i;
+		}	
+		x = (direcao == 'toDireita') ? i : c;
+		
+		if (tabuleiro[i][x] == "") 
+		{
+			n = x;
+			y = i;
+		}	
+		soma += (tabuleiro[i][x] == e) ? 10 : 0;
+	}	
+	
+	if( n != null && n != undefined )
+	{	
+		res = new Array(soma, y, n);
+	}
+	else
+	{
+		res = [];
+	}		
+	
+	console.log('direcão:' +direcao+ '. realizarVarreduraCruzada: ' +res);
+	
+	return res;
+}
+
+
+function realizarVarreduraProsseguirJogo()
+{
+	let soma = 0;
+	let flag = false;
+	let x, y;
+	let res;
+	
+	for(y=0; y<3; y++)
+	{
+		for(x=0; x<3; x++)
+		{	
+			if (tabuleiro[y][x] == "") 
+			{
+				flag = true;
+				break;	
+			}	
+		}	
+		if( flag )
+		{
+			break;
+		}	
+	}
+	
+	soma = flag ? 0 : 30;
+	
+	return new Array(soma, 0, 0);
+}
+
+function verificarStatusJogo(e, opcao = 0)
+{
+	let res;
+	
+	switch(opcao)
+	{
+		case 0: res = realizarVarreduraVH(e);
+				break;
+		case 1: res = realizarVarreduraVH(e, 1);
+				break;
+		case 2: res = realizarVarreduraVH(e, 2);
+				break;
+		case 3: res = realizarVarreduraVH(e, 0, 'V');
+				break;
+		case 4: res = realizarVarreduraVH(e, 1, 'V');
+				break;
+		case 5: res = realizarVarreduraVH(e, 2, 'V');
+				break;
+		case 6: res = realizarVarreduraCruzada(e, 'toDireita');
+				break;
+		case 7: res = realizarVarreduraCruzada(e, 'toEsquerda');
+				break;
+		default: res = realizarVarreduraProsseguirJogo();
+				 break;
+	}
+
+	let soma = res[0];	
+	let l = res[1];
+	let c = res[2];	
+
+	if(continuarJogando)
+	{	
+		continuarJogando = (soma != 30);
+	}	
+	
+	return new Array( (soma == 30), soma, l, c );
+	
+}
 
 function statusJogo(e, iniciarLoop = 0, finalizarLoop = 4)
 {
@@ -131,55 +277,27 @@ function limparDivs()
 }
 
 
-function calcularJogadaAdversario(value)
+function verificarJogoAdversario(value)
 {
-	console.log('calcularJogadaAdversario');
+	console.log('verificarJogoAdversario');
 	
 	let resultado;
 
 	
 	let p = new Array();
 	let l, c, i;
-	let flag = 'N';
 
-	for (i=0; i<4; i++)
+	for (i=0; i<8; i++)
 	{	
 
-		resultado = statusJogo(value, i, ++i);
+		resultado = verificarStatusJogo(value, i);
 		console.log('resultado: ' + resultado);		
 	
 		if( resultado[1] == 20 )
 		{
 			l = resultado[2];
 			c = resultado[3];
-			flag = 'S';
-			switch(resultado[1])
-			{
-				case 0: 
-						c = 2;
-						break;
-						
-				case 1: l = 2;
-						break;
-						
-				case 2: 
-						l = 2;
-						c = 2;
-						break;
-				
-				case 3: 
-						l = 0;
-						c = 0;
-						break;			
-				default:
-						flag = 'N'		
-						break;
-			}
-			
-			if( flag == 'S' )
-			{	
-				p = [l, c];		
-			}	
+			p = [l, c];		
 			
 			break;
 		}	
@@ -205,10 +323,12 @@ function jogarIntermediario()
 	let i, j;
 	let value = 'N';
 
-	let res = calcularJogadaAdversario('X');
-	console.log(res);	
+	let res = verificarJogoAdversario('X');
+	console.log('resultado de verificarJogoAdversario:' + res);	
+	console.log('resultado de verificarJogoAdversario:' + res[0] + ', ' +res[1]);		
 	if( res.length > 0 )
 	{
+		console.log('1. resultado de verificarJogoAdversario:' + res[0] + ', ' +res[1]);				
 		return new Array('S', res[0], res[1]);
 	}	
 
@@ -295,6 +415,8 @@ function realizarJogadaJogadorEletronico()
 			i = ++jogadaFeita[1];
 			j = ++jogadaFeita[2];
 			name = "divl" +i.toString()+ "c" +j.toString();
+			console.log('jogadaFeita: ' +jogadaFeita);			
+			console.log('div name: ' +name);
 			marcarDiv = document.getElementById(name);
 			marcarDiv.innerHTML = "0";
 			marcarRegiao(marcarDiv);
@@ -315,7 +437,16 @@ function exibirResultado(value)
 		resultadoJogo.innerHTML = 'Ganhador: ';
 		resultadoJogo.innerHTML += (value == 'X') ? nomeJogador : 'Computador';		
 		continuarJogando = false;
-	}	
+		pararTemporizador();
+	}
+	else if( !verificarStatusJogo(value, 8) )
+	{
+		console.log('verificarStatusJogo');
+		
+		resultadoJogo.innerHTML = 'Ninguém ganhou';
+		continuarJogando = false;
+		pararTemporizador();
+	}		
 }
 
 function divTabelaClick(e)
@@ -368,7 +499,7 @@ function iniciarNovoJogoClick()
 	inicializarTabuleiro();
 	iniciarPrimeiraJogada();
 	
-	setInterval(realizarJogadaJogadorEletronico, tempoJogadorEletronico);
+	temporizador = setInterval(realizarJogadaJogadorEletronico, tempoJogadorEletronico);
 }
 
 function comboNivelJogoChange(e)
