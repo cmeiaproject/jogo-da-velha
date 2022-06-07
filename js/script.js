@@ -211,6 +211,7 @@ function verificarStatusJogo(e, status = 0, opcao = 0)
 	
 }
 
+/*
 function statusJogo(e, iniciarLoop = 0, finalizarLoop = 4)
 {
 	let xTotal, yTotal;
@@ -294,7 +295,7 @@ function statusJogo(e, iniciarLoop = 0, finalizarLoop = 4)
 	
 	return new Array( (soma == 30), soma, loop, l, c );
 }
-
+*/
 
 function inicializarTabuleiro()
 {
@@ -427,7 +428,6 @@ function exibirResultado(value)
 	res = verificarSituacaoJogo(value, 1);
 	if( res != 2 )
 	{
-		
 		if(res == 3)
 		{
 			resultadoJogo.innerHTML = 'Empate';
@@ -439,24 +439,11 @@ function exibirResultado(value)
 		}	
 		continuarJogando = false;
 		pararTemporizador();
-	}	
-
-/*	
-	if( statusJogo(value)[0] )
-	{
-		resultadoJogo.innerHTML = 'Ganhador: ';
-		resultadoJogo.innerHTML += (value == 'X') ? nomeJogador : 'Computador';		
-		continuarJogando = false;
-		pararTemporizador();
 	}
-	else if( !verificarStatusJogo(value, 8) )
+	else
 	{
-		
-		resultadoJogo.innerHTML = 'Ninguém ganhou';
-		continuarJogando = false;
-		pararTemporizador();
+		resultadoJogo.innerHTML = '';		
 	}		
-*/	
 }
 
 function divTabelaClick(e)
@@ -487,6 +474,7 @@ function exibirJogador()
 	{
 		jogadorLabel.innerHTML = '';		
 	}	
+	resultadoJogo.innerHTML = '';			
 }
 
 function iniciarPrimeiraJogada()
