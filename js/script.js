@@ -27,7 +27,7 @@ function retornarPrimeiroJogador()
 	return Math.round( Math.random() );
 }
 
-function realizarVarreduraVH(e, p = 0, direcao = 'H')
+function realizarVarreduraVH(e, status = 0, p = 0, direcao = 'H')
 {
 	let soma = 0;
 	let i, n;
@@ -42,7 +42,6 @@ function realizarVarreduraVH(e, p = 0, direcao = 'H')
 		if (tabuleiro[y][x] == "") 
 		{
 			n = (direcao == 'H') ? x : y;		
-			console.log('valor de n:' + n);				
 		}	
 		soma += (tabuleiro[y][x] == e) ? 10 : 0;
 	}	
@@ -58,12 +57,16 @@ function realizarVarreduraVH(e, p = 0, direcao = 'H')
 	{
 		res = [];
 	}	
-	console.log('direção:'+direcao+'. realizarVarreduraVH: ' + res);	
+	
+	if(status == 1)
+	{
+		res = [soma];
+	}	
 	
 	return res;
 }	
 
-function realizarVarreduraCruzada(e, direcao = "toDireita")
+function realizarVarreduraCruzada(e, status = 0, direcao = "toDireita")
 {
 	let soma = 0;
 	let i, n;
@@ -72,11 +75,11 @@ function realizarVarreduraCruzada(e, direcao = "toDireita")
 	
 	for(i=0; i<3; i++)
 	{
-		if(direcao == 'toEsquerda')
+		if(direcao == "toEsquerda")
 		{
 			c = 2 - i;
 		}	
-		x = (direcao == 'toDireita') ? i : c;
+		x = (direcao == "toDireita") ? i : c;
 		
 		if (tabuleiro[i][x] == "") 
 		{
@@ -95,7 +98,10 @@ function realizarVarreduraCruzada(e, direcao = "toDireita")
 		res = [];
 	}		
 	
-	console.log('direcão:' +direcao+ '. realizarVarreduraCruzada: ' +res);
+	if(status == 1)
+	{
+		res = [soma];
+	}	
 	
 	return res;
 }
@@ -129,30 +135,67 @@ function realizarVarreduraProsseguirJogo()
 	return new Array(soma, 0, 0);
 }
 
-function verificarStatusJogo(e, opcao = 0)
+function verificarSituacaoJogo(e, status = 0, opcao = 0)
+{
+	let resultado;
+	let value;
+
+	value = verificarStatusJogo(e, status, opcao);
+	
+	if(value[0] || opcao == 8)
+	{
+		if(opcao == 8 && value[0])	
+		{
+			resultado = 3;
+		}	
+		else if( value[0] )
+		{
+			resultado = (e == '0') ? 0 : 1;
+		}
+		else
+		{		
+			resultado = 2;
+		}	
+		
+		return resultado;
+	}
+	else if(opcao == 8)
+	{
+		return resu
+	}	
+	else
+	{	
+		opcao++;
+		return verificarSituacaoJogo(e, status, opcao);
+		
+	}	
+}
+
+
+function verificarStatusJogo(e, status = 0, opcao = 0)
 {
 	let res;
 	
 	switch(opcao)
 	{
-		case 0: res = realizarVarreduraVH(e);
+		case 0: res = realizarVarreduraVH(e, status);
 				break;
-		case 1: res = realizarVarreduraVH(e, 1);
+		case 1: res = realizarVarreduraVH(e, status, 1);
 				break;
-		case 2: res = realizarVarreduraVH(e, 2);
+		case 2: res = realizarVarreduraVH(e, status, 2);
 				break;
-		case 3: res = realizarVarreduraVH(e, 0, 'V');
+		case 3: res = realizarVarreduraVH(e, status, 0, 'V');
 				break;
-		case 4: res = realizarVarreduraVH(e, 1, 'V');
+		case 4: res = realizarVarreduraVH(e, status, 1, 'V');
 				break;
-		case 5: res = realizarVarreduraVH(e, 2, 'V');
+		case 5: res = realizarVarreduraVH(e, status, 2, 'V');
 				break;
-		case 6: res = realizarVarreduraCruzada(e, 'toDireita');
+		case 6: res = realizarVarreduraCruzada(e, status, 'toDireita');
 				break;
-		case 7: res = realizarVarreduraCruzada(e, 'toEsquerda');
+		case 7: res = realizarVarreduraCruzada(e, status, 'toEsquerda');
 				break;
-		default: res = realizarVarreduraProsseguirJogo();
-				 break;
+		case 8: res = realizarVarreduraProsseguirJogo();
+				break;
 	}
 
 	let soma = res[0];	
@@ -277,10 +320,8 @@ function limparDivs()
 }
 
 
-function verificarJogoAdversario(value)
+function verificarJogoJogador(value)
 {
-	console.log('verificarJogoAdversario');
-	
 	let resultado;
 
 	
@@ -290,8 +331,7 @@ function verificarJogoAdversario(value)
 	for (i=0; i<8; i++)
 	{	
 
-		resultado = verificarStatusJogo(value, i);
-		console.log('resultado: ' + resultado);		
+		resultado = verificarStatusJogo(value, 0, i);
 	
 		if( resultado[1] == 20 )
 		{
@@ -318,19 +358,29 @@ function marcarRegiao(e)
 	tabuleiro[l][c] = valor;
 }
 
-function jogarIntermediario()
+function realizarJogadaEletronica()
 {
+	let resultado;
+	
 	let i, j;
-	let value = 'N';
+	let jogadorA = [];
+	let jogadorB = [];
 
-	let res = verificarJogoAdversario('X');
-	console.log('resultado de verificarJogoAdversario:' + res);	
-	console.log('resultado de verificarJogoAdversario:' + res[0] + ', ' +res[1]);		
-	if( res.length > 0 )
-	{
-		console.log('1. resultado de verificarJogoAdversario:' + res[0] + ', ' +res[1]);				
-		return new Array('S', res[0], res[1]);
-	}	
+	if(nivel > 0)
+	{	
+		jogadorA = verificarJogoJogador('X');
+		if(nivel > 1)
+		{
+			jogadorB = verificarJogoJogador('0');			
+		}
+		
+		resultado = (jogadorB.length > 0) ? jogadorB : jogadorA;
+		
+		if( resultado.length > 0)
+		{
+			return new Array('S', resultado[0], resultado[1]);
+		}	
+	}
 
 	do
 	{
@@ -340,58 +390,6 @@ function jogarIntermediario()
 	while( (tabuleiro[i][j] != "") );
 		
 	return new Array('S', i, j);
-
-}
-
-function jogarAvancado()
-{
-	return jogarIniciante();
-}
-
-function jogarIniciante()
-{
-	let i, j;
-	let value = 'N';
-	
-	for(i=0; i<3; i++)
-	{	
-		for(j=0; j<3; j++)
-		{
-			if(tabuleiro[i][j] == "")
-			{	
-				value = "S";
-				break;
-			}
-		}	
-		
-		if(value == "S")
-		{
-			break;
-		}
-	}		
-	
-	return new Array(value, i, j);
-}
-
-
-function realizarJogadaEletronica(nivel, Iniciante, Intermediario, Avancado)
-{
-	let resultado;
-	
-	if(nivel == 2)
-	{
-		resultado = Avancado();
-	}	
-	else if(nivel == 1)
-	{
-		resultado = Intermediario();		
-	}	
-	else
-	{
-		resultado = Iniciante();				
-	}	
-	
-	return resultado;
 }
 
 
@@ -404,19 +402,13 @@ function realizarJogadaJogadorEletronico()
 	
 	if(continuarJogando && (jogador == jogadorEletronico))
 	{	
-	
-		jogadaFeita = realizarJogadaEletronica(nivel, 
-												jogarIniciante, 
-												jogarIntermediario, 
-												jogarAvancado);
+		jogadaFeita = realizarJogadaEletronica();
 	
 		if(jogadaFeita[0] == "S")
 		{	
 			i = ++jogadaFeita[1];
 			j = ++jogadaFeita[2];
 			name = "divl" +i.toString()+ "c" +j.toString();
-			console.log('jogadaFeita: ' +jogadaFeita);			
-			console.log('div name: ' +name);
 			marcarDiv = document.getElementById(name);
 			marcarDiv.innerHTML = "0";
 			marcarRegiao(marcarDiv);
@@ -432,6 +424,24 @@ function realizarJogadaJogadorEletronico()
 
 function exibirResultado(value)
 {
+	res = verificarSituacaoJogo(value, 1);
+	if( res != 2 )
+	{
+		
+		if(res == 3)
+		{
+			resultadoJogo.innerHTML = 'Empate';
+		}	
+		else
+		{
+			resultadoJogo.innerHTML = 'Ganhador: ';
+			resultadoJogo.innerHTML += (res == 0) ? 'Jogador Eletroncio' : nomeJogador;											
+		}	
+		continuarJogando = false;
+		pararTemporizador();
+	}	
+
+/*	
 	if( statusJogo(value)[0] )
 	{
 		resultadoJogo.innerHTML = 'Ganhador: ';
@@ -441,12 +451,12 @@ function exibirResultado(value)
 	}
 	else if( !verificarStatusJogo(value, 8) )
 	{
-		console.log('verificarStatusJogo');
 		
 		resultadoJogo.innerHTML = 'Ninguém ganhou';
 		continuarJogando = false;
 		pararTemporizador();
 	}		
+*/	
 }
 
 function divTabelaClick(e)
@@ -498,6 +508,10 @@ function iniciarNovoJogoClick()
 	limparDivs();
 	inicializarTabuleiro();
 	iniciarPrimeiraJogada();
+	if(temporizador != null || temporizador == undefined)
+	{
+		pararTemporizador();
+	}	
 	
 	temporizador = setInterval(realizarJogadaJogadorEletronico, tempoJogadorEletronico);
 }
