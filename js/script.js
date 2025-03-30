@@ -193,7 +193,7 @@ function exibirResultado(value)
 {
 	result = verificarSituacaoJogo(value); //, 1);
 
-if(result == CONTINUAR_JOGO)
+	if(result == CONTINUAR_JOGO)
 		resultadoJogo.innerHTML = '';
 	else 
 	{
@@ -217,7 +217,7 @@ function divCasaTabuleiroClick(e)
 {
 	if(continuarJogando && (jogador == JOGADOR_HUMANO))
 	{	
-		if (this.innerHTML == '')
+		if (this.style.backgroundImage == 'none')
 		{	
 			this.style.backgroundImage = "url('img/figuraX.png')";
 
@@ -246,7 +246,7 @@ function iniciarNovoJogoClick()
 	iniciarPrimeiraJogada();
 
 	jogadorLabel.innerHTML = '';			
-	resultadoJogo.innerHTML = '';			
+	resultadoJogo.innerHTML = '';		
 
 	if(temporizador != null || temporizador == undefined)
 		pararTemporizador();
