@@ -48,7 +48,7 @@ function limparDivs()
 	for(let casa of casaTabuleiro)
 	{
 		casa.style.backgroundImage = 'none';
-		casa.style.backgroundSize = 'cover';
+		casa.style.backgroundSize = 'contain';		
 	}	
 }
 
